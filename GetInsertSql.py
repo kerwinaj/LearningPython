@@ -3,7 +3,7 @@
 
 import os
 
-__author__ = 'yukai'
+__author__ = 'kerwinaj'
 
 projectPath = os.getcwd()
 print projectPath
