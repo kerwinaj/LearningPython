@@ -159,14 +159,15 @@ def parse_params():
         elif arguments["devEnv"]:
             # just use git revert is ok
             pass
-        defineOtherConfSourceFile = "/home/yukai/share/conf/define.other.conf.from"
-        defineConfTargetFile = os.path.join(basePath, "conf/define.conf")
 
         orderConfSourceFile = "/home/yukai/share/conf/order.conf.from"
         orderConfTargetFile = os.path.join(basePath, "conf/biz/order.conf")
     else:
         print "arguments error !"
         sys.exit()
+
+    defineOtherConfSourceFile = "/home/yukai/share/conf/define.other.conf.from"
+    defineConfTargetFile = os.path.join(basePath, "conf/define.conf")
 
     log4jSourceFile = "/home/yukai/share/conf/log4j.properties.from"
     log4jTargetFile = os.path.join(basePath, "conf/env/log4j.properties")
