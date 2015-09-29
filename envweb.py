@@ -211,10 +211,12 @@ def change_define_db_local():
     defineDbConfSourceFile = "/home/yukai/share/conf/define.db.conf.from"
     defineConfTargetFile = os.path.join(modulePathAbsolute, "conf/define.conf")
 
+
 def change_define_conf_normal_db():
     global defineConfNormalDbSourceFile, defineConfNormalDbTargetFile
     defineConfNormalDbSourceFile = "/home/yukai/share/conf/define.conf.normal-db"
     defineConfNormalDbTargetFile = os.path.join(modulePathAbsolute, "conf/define.conf")
+
 
 def change_global_db_local():
     global globalSourceFile, globalTargetFile
