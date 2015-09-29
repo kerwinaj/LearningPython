@@ -4,8 +4,8 @@
 Description:
   Utils to change env configurations
 Usage:
-  my_program --m=<ci>
-  my_program --m=<normal> (local | devEnv)
+  my_program [--p=<path>] --m=<ci>
+  my_program [--p=<path>] --m=<normal> (local | devEnv)
   my_program (-h | --help | --version)
 
 Options:
@@ -40,17 +40,49 @@ from docopt import docopt
 
 arguments = docopt(__doc__, sys.argv[1:])
 
-basePath = "/home/yukai/git-uc/gcmall/gcmall_src/gcmall_web/"
+projectPathAbsoluteDefault = "/home/yukai/git-uc/gcmall"
+projectPathAbsoluteCustomer = arguments["--p"]
+modulePathRelateDefault = "/gcmall_src/gcmall_web/"
+modulePathAbsolute = ""
+
+
+# === test string here start ===
+'''
+(1) python PycharmProjects/LearnPython/envweb.py --m=normal --p="  "
+(2) python PycharmProjects/LearnPython/envweb.py --m=normal --p=""
+(3) python PycharmProjects/LearnPython/envweb.py --m=normal --p=
+(4) python PycharmProjects/LearnPython/envweb.py --m=normal
+'''
+print "[argument --p]:type"+str(type(projectPathAbsoluteCustomer))+";value:["+str(projectPathAbsoluteCustomer)+"];trim value:["+str(projectPathAbsoluteCustomer).strip()+"]"
+
+if str(projectPathAbsoluteCustomer).strip() == "":
+    print "[argument --p] is empty, not allow here. (1),(2),(3)"
+    sys.exit()
+elif projectPathAbsoluteCustomer is None:
+    print "[argument --p] not exist, use default. (4)"
+    modulePathAbsolute = projectPathAbsoluteDefault + modulePathRelateDefault
+    pass
+else:
+    print "[argument --p] is not empty, use the path. ["+str(projectPathAbsoluteCustomer).strip()+"]"
+    modulePathAbsolute = str(projectPathAbsoluteCustomer) + modulePathRelateDefault
+# === test string here end ===
+
+
 defineDbConfSourceFile = ""
 defineOtherConfSourceFile = ""
 defineConfTargetFile = ""
+
 orderConfSourceFile = ""
 orderConfTargetFile = ""
+
 log4jSourceFile = ""
 log4jTargetFile = ""
+
 globalSourceFile = ""
 globalTargetFile = ""
 
+defineConfNormalDbSourceFile = ""
+defineConfNormalDbTargetFile = ""
 
 class ConfigLoader():
     '''
@@ -144,52 +176,60 @@ class ConfigExchange():
 
 
 def parse_params():
-    global arguments, basePath, \
+    global arguments, modulePathAbsolute, \
         defineDbConfSourceFile, defineOtherConfSourceFile, defineConfTargetFile, \
         orderConfSourceFile, orderConfTargetFile, \
         log4jSourceFile, log4jTargetFile, \
-        globalSourceFile, globalTargetFile
+        globalSourceFile, globalTargetFile, \
+        defineConfNormalDbSourceFile, defineConfNormalDbTargetFile
     mode = arguments["--m"]
     if mode == "ci":
         change_define_db_local()
         change_global_db_local()
     elif mode == "normal":
         if arguments["local"]:
-            change_define_db_local()
+            change_define_conf_normal_db()
         elif arguments["devEnv"]:
             # just use git revert is ok
             pass
 
         orderConfSourceFile = "/home/yukai/share/conf/order.conf.from"
-        orderConfTargetFile = os.path.join(basePath, "conf/biz/order.conf")
+        orderConfTargetFile = os.path.join(modulePathAbsolute, "conf/biz/order.conf")
     else:
         print "arguments error !"
         sys.exit()
 
     defineOtherConfSourceFile = "/home/yukai/share/conf/define.other.conf.from"
-    defineConfTargetFile = os.path.join(basePath, "conf/define.conf")
+    defineConfTargetFile = os.path.join(modulePathAbsolute, "conf/define.conf")
 
     log4jSourceFile = "/home/yukai/share/conf/log4j.properties.from"
-    log4jTargetFile = os.path.join(basePath, "conf/env/log4j.properties")
+    log4jTargetFile = os.path.join(modulePathAbsolute, "conf/env/log4j.properties")
 
 
 def change_define_db_local():
     global defineDbConfSourceFile, defineConfTargetFile
     defineDbConfSourceFile = "/home/yukai/share/conf/define.db.conf.from"
-    defineConfTargetFile = os.path.join(basePath, "conf/define.conf")
+    defineConfTargetFile = os.path.join(modulePathAbsolute, "conf/define.conf")
+
+def change_define_conf_normal_db():
+    global defineConfNormalDbSourceFile, defineConfNormalDbTargetFile
+    defineConfNormalDbSourceFile = "/home/yukai/share/conf/define.conf.normal-db"
+    defineConfNormalDbTargetFile = os.path.join(modulePathAbsolute, "conf/define.conf")
 
 def change_global_db_local():
     global globalSourceFile, globalTargetFile
     globalSourceFile = "/home/yukai/share/conf/global.properties.from"
-    globalTargetFile = os.path.join(basePath, "test/resources/global.properties")
+    globalTargetFile = os.path.join(modulePathAbsolute, "test/resources/global.properties")
 
 
 def chang_config(sourceFile, targetFile):
-    global basePath
+    global modulePathAbsolute
     if sourceFile and targetFile:
         sourceDict = ConfigLoader(sourceFile).load()
         targetDict = ConfigLoader(targetFile).load()
-        ConfigExchange(targetFile, targetDict, sourceDict, basePath)
+        ConfigExchange(targetFile, targetDict, sourceDict, modulePathAbsolute)
+        print "[change config]\ttarget : "+targetFile
+        print "\t\tsource : "+sourceFile
 
 
 if __name__ == "__main__":
@@ -204,5 +244,7 @@ if __name__ == "__main__":
     chang_config(log4jSourceFile, log4jTargetFile)
 
     chang_config(globalSourceFile, globalTargetFile)
+
+    chang_config(defineConfNormalDbSourceFile, defineConfNormalDbTargetFile)
 
     print "ok~, It's done."
